@@ -23,7 +23,7 @@ char pass[] = "MaxiSoft83.";
 
 String Hostname; // имя железки - выглядит как ESPAABBCCDDEEFF т.е. ESP+mac адрес.
 
-unsigned long my_time = millis();
+unsigned long my_time = millis() + postingInterval;
 
 double bme280_temperature;
 double bme280_pressure;
@@ -62,8 +62,8 @@ void setup()
       ; // Зацикливаем
   }
 
-  Serial.println("Start WebServer");
   HTTP_init();
+  Serial.println("Start WebServer");
 
   pinMode(LED_BUILTIN, OUTPUT);
   delay(1000);
@@ -72,11 +72,14 @@ void setup()
 void loop()
 {
   HTTP.handleClient();
+  //Serial.println("handleClientStarted");
   delay(1);
 
   if ((my_time + 10000) < millis())
   {
+    Serial.println("Чтение сенсоров");
     ReadSensors();
+    Serial.println("Считали сенсоры");
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     my_time = millis();
   }
@@ -86,6 +89,7 @@ void loop()
 
     if (WiFi.status() == WL_CONNECTED)
     { // ну конечно если подключены
+      Serial.println("Начали отправку");
       if (SendToNarodmon)
       {
         lastConnectionTime = millis();
@@ -94,6 +98,7 @@ void loop()
       else
       {
         lastConnectionTime = millis() - postingInterval + 15000; // следующая попытка через 15 сек
+        Serial.println("Первый повтор");
       }
     }
     else
@@ -130,6 +135,7 @@ bool SendToNarodmon()
       String line = client.readStringUntil('\r'); // если что-то в ответ будет - все в Serial
       Serial.print(line);
     }
+    Serial.println("Отправили");
   }
   return true; // ушло
 }
