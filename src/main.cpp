@@ -184,7 +184,7 @@ void handleNotFound()
 // Ответ при обращении к основной странице
 void handleRoot()
 {
-  String message = "200 ";
+  String message = "200 ROOT ";
   for (uint8_t i = 0; i < HTTP.args(); i++)
   {
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
@@ -196,7 +196,7 @@ void handleRoot()
 
 void handleSensors()
 {
-  String message = "200 ";
+  String message = "200 POST ";
   for (uint8_t i = 0; i < HTTP.args(); i++)
   {
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
