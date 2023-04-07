@@ -62,7 +62,7 @@ void setup()
       ; // Зацикливаем
   }
 
-  Serial.println("Start 2-WebServer");
+  Serial.println("Start WebServer");
   HTTP_init();
 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -147,8 +147,8 @@ void ReadSensors()
 
 void HTTP_init(void)
 {
-  HTTP.onNotFound(handleNotFound);     // Сообщение если нет страницы. Попробуйте ввести http://192.168.0.101/restar?device=ok&test=1&led=on
-  HTTP.on("/", handleRoot);            // Главная страница http://192.168.0.101/
+  HTTP.onNotFound(handleNotFound); // Сообщение если нет страницы. Попробуйте ввести http://192.168.0.101/restar?device=ok&test=1&led=on
+  HTTP.on("/", handleRoot);        // Главная страница http://192.168.0.101/
   HTTP.on("/sensors", handleSensors);
   HTTP.on("/restart", handle_Restart); // Перезагрузка модуля по запросу вида http://192.168.0.101/restart?device=ok
   // Запускаем HTTP сервер
@@ -176,19 +176,25 @@ void handleNotFound()
 // Ответ при обращении к основной странице
 void handleRoot()
 {
-  HTTP.send(200, "text/plain", "hello from esp8266!");
-  Serial.println("Обращение к корню сервера");
+  String message = "200 ";
+  for (uint8_t i = 0; i < HTTP.args(); i++)
+  {
+    message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
+    Serial.println(message);
+  }
+  Serial.println(message);
+  HTTP.send(200, "text/plain", message);
 }
 
 void handleSensors()
 {
-  String message="";
+  String message = "404 ";
   for (uint8_t i = 0; i < HTTP.args(); i++)
   {
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
   }
   HTTP.send(404, "text/plain", message);
-  Serial.println("handleSensors");
+  Serial.println(message);
 }
 
 // Перезагрузка модуля по запросу вида http://192.168.0.101/restart?device=ok
