@@ -23,13 +23,13 @@ char pass[] = "MaxiSoft83.";
 
 String Hostname; // имя железки - выглядит как ESPAABBCCDDEEFF т.е. ESP+mac адрес.
 
-unsigned long my_time = millis() + postingInterval;
+unsigned long my_time = millis();
 
 double bme280_temperature;
 double bme280_pressure;
 double bme280_humidity;
 
-unsigned long lastConnectionTime = 0; // время последней передачи данных
+unsigned long lastConnectionTime = postingInterval; // время последней передачи данных
 
 Adafruit_BME280 bme; // Установка связи по интерфейсу I2C
 ESP8266WebServer HTTP(80);
@@ -64,6 +64,7 @@ void setup()
 
   HTTP_init();
   Serial.println("Start WebServer");
+  ReadSensors();
 
   pinMode(LED_BUILTIN, OUTPUT);
   delay(1000);
@@ -72,14 +73,12 @@ void setup()
 void loop()
 {
   HTTP.handleClient();
-  //Serial.println("handleClientStarted");
+  // Serial.println("handleClientStarted");
   delay(1);
 
   if ((my_time + 10000) < millis())
   {
-    Serial.println("Чтение сенсоров");
     ReadSensors();
-    Serial.println("Считали сенсоры");
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     my_time = millis();
   }
@@ -142,6 +141,8 @@ bool SendToNarodmon()
 
 void ReadSensors()
 {
+  Serial.println("Чтение сенсоров");
+
   bme280_temperature = bme.readTemperature();
   bme280_pressure = bme.readPressure() / 133.3F;
   bme280_humidity = bme.readHumidity();
@@ -149,6 +150,7 @@ void ReadSensors()
   Serial.println(bme280_temperature);
   Serial.println(bme280_pressure);
   Serial.println(bme280_humidity);
+  Serial.println("Считали сенсоры");
 }
 
 void HTTP_init(void)
@@ -194,7 +196,7 @@ void handleRoot()
 
 void handleSensors()
 {
-  String message = "404 ";
+  String message = "200 ";
   for (uint8_t i = 0; i < HTTP.args(); i++)
   {
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
