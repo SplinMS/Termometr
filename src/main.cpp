@@ -117,7 +117,7 @@ void transmit()
 {
   http.begin(wifiClient, "http://192.168.0.240");
   http.addHeader("Content-Type", "text/plain");
-  int httpCode = http.POST("Message from ESP8266");
+  int httpCode = http.POST("/sensors?temp=25&pres=700&hum=50");
   String payload = http.getString();
   Serial.println(httpCode);
   Serial.println(payload);
