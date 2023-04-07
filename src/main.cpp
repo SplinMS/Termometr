@@ -56,13 +56,14 @@ void setup()
   }
 
   pinMode(LED_BUILTIN, OUTPUT);
-  delay(5000);
+  delay(1000);
 }
 
 void loop()
 {
   if ((my_time + 10000) < millis())
   {
+    ReadSensors();
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     my_time = millis();
   }
@@ -70,11 +71,11 @@ void loop()
   if (millis() - lastConnectionTime > postingInterval)
   { // ждем 5 минут и отправляем
 
-    ReadSensors();
+    
 
     if (WiFi.status() == WL_CONNECTED)
     { // ну конечно если подключены
-      if (SendToNarodmon())
+      if (1)
       {
         lastConnectionTime = millis();
         Serial.println("Отправил на народмонитор");
