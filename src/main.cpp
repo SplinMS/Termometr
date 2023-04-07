@@ -40,7 +40,7 @@ void setup()
 {
   // Debug console
   Serial.begin(115200);
-
+  Serial.println("Street");
   WiFi.begin(ssid, pass);
   while (WiFi.status() != WL_CONNECTED)
   {
