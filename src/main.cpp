@@ -8,14 +8,23 @@ unsigned long lastConnectionTime = 0; // время последней пере�
 #include <ESP8266WiFi.h>
 #include <Adafruit_BME280.h> // Подключаем библиотеку Adafruit_BME280
 #include <Adafruit_Sensor.h> // Подключаем библиотеку Adafruit_Sensor
-
+#include <ESP8266HTTPClient.h>
 
 void ReadSensors();
-bool SendToNarodmon();
+void transmit();
+
+HTTPClient http;
+WiFiClient wifiClient;
+
 // Your WiFi credentials.
 // Set password to "" for open networks.
 char ssid[] = "Ukrainer";
 char pass[] = "MaxiSoft83.";
+
+const char *host = "http://192.168.0.240"; // Адрес нашего веб сервера
+const int httpsPort = 80;
+
+String Link; // Адрес порта для HTTPS= 443 или HTTP = 80
 
 String Hostname; // имя железки - выглядит как ESPAABBCCDDEEFF т.е. ESP+mac адрес.
 
@@ -64,14 +73,13 @@ void loop()
   if ((my_time + 10000) < millis())
   {
     ReadSensors();
+    transmit();
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     my_time = millis();
   }
 
   if (millis() - lastConnectionTime > postingInterval)
   { // ждем 5 минут и отправляем
-
-    
 
     if (WiFi.status() == WL_CONNECTED)
     { // ну конечно если подключены
@@ -93,36 +101,6 @@ void loop()
   }
 }
 
-bool SendToNarodmon()
-{ // Собственно формирование пакета и отправка.
-  WiFiClient client;
-  // DeviceAddress tempDeviceAddress;
-  Serial.println("Формирование пакета");
-  String buf;
-  buf = "#" + Hostname + "\r\n"; // заголовок
-  buf = buf + "#TEMPERATURBME280#" + String(bme280_temperature) + "\r\n";
-  buf = buf + "#HUMIDITYBME280#" + String(bme280_humidity) + "\r\n";
-  buf = buf + "#PRESSUREBME280#" + String(bme280_pressure) + "\r\n";
-  buf = buf + "##\r\n"; // закрываем пакет
-  if (!client.connect("narodmon.ru", 8283))
-  { // попытка подключения
-    Serial.println("connection failed");
-    return false; // не удалось;
-  }
-  else
-  {
-    client.print(buf); // и отправляем данные
-    if (DEBUG)
-      Serial.print(buf);
-    while (client.available())
-    {
-      String line = client.readStringUntil('\r'); // если что-то в ответ будет - все в Serial
-      Serial.print(line);
-    }
-  }
-  return true; // ушло
-}
-
 void ReadSensors()
 {
   bme280_temperature = bme.readTemperature();
@@ -132,4 +110,17 @@ void ReadSensors()
   Serial.println(bme280_temperature);
   Serial.println(bme280_pressure);
   Serial.println(bme280_humidity);
+}
+
+// Обьявление функции передачи данных
+void transmit()
+{
+  http.begin(wifiClient, "http://192.168.0.240");
+  http.addHeader("Content-Type", "text/plain");
+  int httpCode = http.POST("Message from ESP8266");
+  String payload = http.getString();
+  Serial.println(httpCode);
+  Serial.println(payload);
+  http.end();
+  delay(10000);
 }
