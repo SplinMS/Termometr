@@ -89,7 +89,7 @@ void loop()
     if (WiFi.status() == WL_CONNECTED)
     { // ну конечно если подключены
       Serial.println("Начали отправку");
-      if (SendToNarodmon)
+      if (1)
       {
         lastConnectionTime = millis();
         Serial.println("Отправил на народмонитор");
