@@ -122,9 +122,12 @@ bool SendToNarodmon()
   buf = buf + "#TEMPERATURBME280#" + String(bme280_temperature) + "\r\n";
   buf = buf + "#HUMIDITYBME280#" + String(bme280_humidity) + "\r\n";
   buf = buf + "#PRESSUREBME280#" + String(bme280_pressure) + "\r\n";
-  buf = buf + "#TEMPERATURSTREETBME280#" + String(bme280_street_temperature) + "\r\n";
-  buf = buf + "#HUMIDITYSTREETBME280#" + String(bme280_street_humidity) + "\r\n";
-  buf = buf + "#PRESSURESTREETBME280#" + String(bme280_street_pressure) + "\r\n";
+  if (bme280_street_pressure != 0)
+  {
+    buf = buf + "#TEMPERATURSTREETBME280#" + String(bme280_street_temperature) + "\r\n";
+    buf = buf + "#HUMIDITYSTREETBME280#" + String(bme280_street_humidity) + "\r\n";
+    buf = buf + "#PRESSURESTREETBME280#" + String(bme280_street_pressure) + "\r\n";
+  }
   buf = buf + "##\r\n"; // закрываем пакет
   if (!client.connect("narodmon.ru", 8283))
   { // попытка подключения
@@ -141,7 +144,7 @@ bool SendToNarodmon()
       String line = client.readStringUntil('\r'); // если что-то в ответ будет - все в Serial
       Serial.print(line);
     }
-    Serial.println("Отправили");
+    //Serial.println("Отправили");
   }
   return true; // ушло
 }
@@ -191,7 +194,14 @@ void handleNotFound()
 // Ответ при обращении к основной странице
 void handleRoot()
 {
-  String message = "200 ROOT ";
+  String message = "Текущее состояние:<br>";
+  message += Hostname + "<br>";
+  message += "Температура в доме = " + String(bme280_temperature) + "<br>";
+  message += "Влажность в доме = " + String(bme280_humidity) + "<br>";
+  message += "Температура на улице = " + String(bme280_street_temperature) + "<br>";
+  message += "Влажность на улице = " + String(bme280_street_humidity) + "<br>";
+  message += "Давление = " + String(bme280_pressure) + "<br>";
+  /*String message = "200 ROOT ";
   message += "URI: ";
   message += HTTP.uri();
   message += "\nMethod: ";
@@ -203,9 +213,9 @@ void handleRoot()
   {
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
     Serial.println(message);
-  }
+  }*/
   Serial.println(message);
-  HTTP.send(200, "text/plain", message);
+  HTTP.send(200, "text/html; charset=utf-8", message);
 }
 
 void handleSensors()
