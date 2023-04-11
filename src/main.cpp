@@ -1,4 +1,4 @@
-#define DEBUG 1
+#define DEBUG 0
 
 #define SEALEVELPRESSURE_HPA (1013.25) // Задаем высоту
 #define postingInterval 330000         // интервал между отправками данных в миллисекундах (5 минут)
@@ -28,6 +28,10 @@ unsigned long my_time = millis();
 double bme280_temperature;
 double bme280_pressure;
 double bme280_humidity;
+
+double bme280_street_temperature = 0;
+double bme280_street_pressure = 0;
+double bme280_street_humidity = 0;
 
 unsigned long lastConnectionTime = postingInterval; // время последней передачи данных
 
@@ -118,6 +122,9 @@ bool SendToNarodmon()
   buf = buf + "#TEMPERATURBME280#" + String(bme280_temperature) + "\r\n";
   buf = buf + "#HUMIDITYBME280#" + String(bme280_humidity) + "\r\n";
   buf = buf + "#PRESSUREBME280#" + String(bme280_pressure) + "\r\n";
+  buf = buf + "#TEMPERATURSTREETBME280#" + String(bme280_street_temperature) + "\r\n";
+  buf = buf + "#HUMIDITYSTREETBME280#" + String(bme280_street_humidity) + "\r\n";
+  buf = buf + "#PRESSURESTREETBME280#" + String(bme280_street_pressure) + "\r\n";
   buf = buf + "##\r\n"; // закрываем пакет
   if (!client.connect("narodmon.ru", 8283))
   { // попытка подключения
@@ -213,6 +220,24 @@ void handleSensors()
   message += "\n";
   for (uint8_t i = 0; i < HTTP.args(); i++)
   {
+    if (HTTP.argName(i) == "temp")
+    {
+      bme280_street_temperature = atof(HTTP.arg(i).c_str());
+      Serial.print("GET=");
+      Serial.println(bme280_street_temperature);
+    }
+    if (HTTP.argName(i) == "press")
+    {
+      bme280_street_pressure = atof(HTTP.arg(i).c_str());
+      Serial.print("GET=");
+      Serial.println(bme280_street_pressure);
+    }
+    if (HTTP.argName(i) == "hum")
+    {
+      bme280_street_humidity = atof(HTTP.arg(i).c_str());
+      Serial.print("GET=");
+      Serial.println(bme280_street_humidity);
+    }
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
   }
   HTTP.send(200, "text/plain", message);
