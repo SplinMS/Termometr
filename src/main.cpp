@@ -185,6 +185,13 @@ void handleNotFound()
 void handleRoot()
 {
   String message = "200 ROOT ";
+  message += "URI: ";
+  message += HTTP.uri();
+  message += "\nMethod: ";
+  message += (HTTP.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += HTTP.args();
+  message += "\n";
   for (uint8_t i = 0; i < HTTP.args(); i++)
   {
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
@@ -197,6 +204,13 @@ void handleRoot()
 void handleSensors()
 {
   String message = "200 POST ";
+  message += "URI: ";
+  message += HTTP.uri();
+  message += "\nMethod: ";
+  message += (HTTP.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += HTTP.args();
+  message += "\n";
   for (uint8_t i = 0; i < HTTP.args(); i++)
   {
     message += " " + HTTP.argName(i) + ": " + HTTP.arg(i) + "\n";
