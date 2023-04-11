@@ -119,6 +119,7 @@ void transmit()
   http.addHeader("Content-Type", "text/plain");
   int httpCode = http.POST("/sensors?temp=25&pres=700&hum=50");
   String payload = http.getString();
+  Serial.print("Ответ сервера:");
   Serial.println(httpCode);
   Serial.println(payload);
   http.end();
