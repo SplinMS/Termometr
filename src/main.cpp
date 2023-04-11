@@ -198,9 +198,10 @@ void handleRoot()
   message += Hostname + "<br>";
   message += "Температура в доме = " + String(bme280_temperature) + "<br>";
   message += "Влажность в доме = " + String(bme280_humidity) + "<br>";
+  message += "Давление в доме = " + String(bme280_pressure) + "<br>";
   message += "Температура на улице = " + String(bme280_street_temperature) + "<br>";
   message += "Влажность на улице = " + String(bme280_street_humidity) + "<br>";
-  message += "Давление = " + String(bme280_pressure) + "<br>";
+  message += "Давление на улице = " + String(bme280_street_pressure) + "<br>";
   /*String message = "200 ROOT ";
   message += "URI: ";
   message += HTTP.uri();
