@@ -115,9 +115,19 @@ void ReadSensors()
 // Обьявление функции передачи данных
 void transmit()
 {
-  http.begin(wifiClient, "http://192.168.0.240");
+  //String my_temp(5,14, 1); //(int)bme280_temperature * 100;
+  //int press = bme280_pressure * 100;
+  //int hum = bme280_humidity * 100;
+  String my_message;
+  my_message += "http://192.168.0.240:80/sensors?temp=";
+  my_message += bme280_temperature;
+  my_message += "&press=";
+  my_message += bme280_pressure;
+  my_message += "&hum=";
+  my_message += bme280_humidity;
+  http.begin(wifiClient, my_message);
   http.addHeader("Content-Type", "text/plain");
-  int httpCode = http.POST("/sensors?temp=25&pres=700&hum=50");
+  int httpCode = http.GET();
   String payload = http.getString();
   Serial.print("Ответ сервера:");
   Serial.println(httpCode);
