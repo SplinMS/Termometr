@@ -2,6 +2,8 @@
 
 #define SEALEVELPRESSURE_HPA (1013.25) // Задаем высоту
 #define postingInterval 330000         // интервал между отправками данных в миллисекундах (5 минут)
+#define TEMPKOR 0.2
+#define HUMKOR 1
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -153,9 +155,9 @@ void ReadSensors()
 {
   Serial.println("Чтение сенсоров");
 
-  bme280_temperature = bme.readTemperature();
+  bme280_temperature = bme.readTemperature()-TEMPKOR;
   bme280_pressure = bme.readPressure() / 133.3F;
-  bme280_humidity = bme.readHumidity();
+  bme280_humidity = bme.readHumidity()-HUMKOR;
 
   Serial.println(bme280_temperature);
   Serial.println(bme280_pressure);
@@ -233,7 +235,7 @@ void handleSensors()
   {
     if (HTTP.argName(i) == "temp")
     {
-      bme280_street_temperature = atof(HTTP.arg(i).c_str());
+      bme280_street_temperature = atof(HTTP.arg(i).c_str())+TEMPKOR;
       Serial.print("GET=");
       Serial.println(bme280_street_temperature);
     }
@@ -245,7 +247,7 @@ void handleSensors()
     }
     if (HTTP.argName(i) == "hum")
     {
-      bme280_street_humidity = atof(HTTP.arg(i).c_str());
+      bme280_street_humidity = atof(HTTP.arg(i).c_str())+HUMKOR;
       Serial.print("GET=");
       Serial.println(bme280_street_humidity);
     }
