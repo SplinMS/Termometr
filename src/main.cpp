@@ -1,9 +1,6 @@
-#define DEBUG 1
+#define DEBUG 0
 
 #define SEALEVELPRESSURE_HPA (1013.25) // Задаем высоту
-#define postingInterval 330000         // интервал между отправками данных в миллисекундах (5 минут)
-
-unsigned long lastConnectionTime = 0; // время последней передачи данных
 
 #include <ESP8266WiFi.h>
 #include <Adafruit_BME280.h> // Подключаем библиотеку Adafruit_BME280
@@ -21,11 +18,6 @@ WiFiClient wifiClient;
 char ssid[] = "Ukrainer";
 char pass[] = "MaxiSoft83.";
 
-const char *host = "http://192.168.0.240"; // Адрес нашего веб сервера
-const int httpsPort = 80;
-
-String Link; // Адрес порта для HTTPS= 443 или HTTP = 80
-
 String Hostname; // имя железки - выглядит как ESPAABBCCDDEEFF т.е. ESP+mac адрес.
 
 unsigned long my_time = millis();
@@ -38,17 +30,24 @@ Adafruit_BME280 bme; // Установка связи по интерфейсу 
 
 void setup()
 {
+#if DEBUG == 1
   // Debug console
   Serial.begin(115200);
   Serial.println("Street");
+#endif
   WiFi.begin(ssid, pass);
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
+#if DEBUG == 1
     Serial.print(".");
+#endif
   }
+#if DEBUG == 1
   Serial.println("Connected");
+#endif
 
+#if DEBUG == 1
   Hostname = "ESP" + WiFi.macAddress();
   Hostname.replace(":", "");
   WiFi.hostname(Hostname);
@@ -56,10 +55,13 @@ void setup()
   Serial.println(WiFi.macAddress());
   Serial.print("Narodmon ID: ");
   Serial.println(Hostname);
+#endif
 
   if (!bme.begin(0x76))
-  {                                                                        // Проверка инициализации датчика
+  {
+#if DEBUG == 1                                                             // Проверка инициализации датчика
     Serial.println("Could not find a valid BME280 sensor, check wiring!"); // Печать, об ошибки инициализации.
+#endif
     while (1)
       ; // Зацикливаем
   }
@@ -77,28 +79,6 @@ void loop()
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     my_time = millis();
   }
-
-  if (millis() - lastConnectionTime > postingInterval)
-  { // ждем 5 минут и отправляем
-
-    if (WiFi.status() == WL_CONNECTED)
-    { // ну конечно если подключены
-      if (1)
-      {
-        lastConnectionTime = millis();
-        Serial.println("Отправил на народмонитор");
-      }
-      else
-      {
-        lastConnectionTime = millis() - postingInterval + 15000; // следующая попытка через 15 сек
-      }
-    }
-    else
-    {
-      lastConnectionTime = millis() - postingInterval + 15000; // следующая попытка через 15 сек
-      Serial.println(WiFi.status());
-    }
-  }
 }
 
 void ReadSensors()
@@ -106,18 +86,16 @@ void ReadSensors()
   bme280_temperature = bme.readTemperature();
   bme280_pressure = bme.readPressure() / 133.3F;
   bme280_humidity = bme.readHumidity();
-
+#if DEBUG == 1
   Serial.println(bme280_temperature);
   Serial.println(bme280_pressure);
   Serial.println(bme280_humidity);
+#endif
 }
 
 // Обьявление функции передачи данных
 void transmit()
 {
-  //String my_temp(5,14, 1); //(int)bme280_temperature * 100;
-  //int press = bme280_pressure * 100;
-  //int hum = bme280_humidity * 100;
   String my_message;
   my_message += "http://192.168.0.240:80/sensors?temp=";
   my_message += bme280_temperature;
@@ -128,10 +106,12 @@ void transmit()
   http.begin(wifiClient, my_message);
   http.addHeader("Content-Type", "text/plain");
   int httpCode = http.GET();
+#if DEBUG == 1
   String payload = http.getString();
   Serial.print("Ответ сервера:");
   Serial.println(httpCode);
   Serial.println(payload);
+#endif
   http.end();
   delay(10000);
 }
